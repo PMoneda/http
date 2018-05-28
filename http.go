@@ -26,6 +26,9 @@ func Post(url string, body interface{}, headers ...Header) (string, error) {
 
 //Get make a GET request
 func Get(url string) (string, error) {
+	if currentContext != nil {
+		return doRequestMock("GET", url, nil)
+	}
 	if resp, err := http.Get(url); err != nil {
 		return "", err
 	} else if response, err := ioutil.ReadAll(resp.Body); err != nil {
@@ -37,12 +40,10 @@ func Get(url string) (string, error) {
 
 //GetJSON make a GET request and unmarshal response to JSON
 func GetJSON(url string, obj interface{}) error {
-	if resp, err := http.Get(url); err != nil {
-		return err
-	} else if response, err := ioutil.ReadAll(resp.Body); err != nil {
+	if response, err := Get(url); err != nil {
 		return err
 	} else {
-		return json.Unmarshal(response, obj)
+		return json.Unmarshal([]byte(response), obj)
 	}
 }
 
