@@ -46,11 +46,17 @@ response, err := http.Post("http://my-awesome-api.com", body);
 
 With Mock
 ```golang
+func TestShouldRequestToAwesomeAPI(t *testing.T) {
   mock := http.ReponseMock{
     Method: "POST",
   }
-  http.With(func(ctx *http.MockContext) {
+  http.With(t, func(ctx *http.MockContext) {
     ctx.RegisterMock(&mock)
     response, err := http.Post("http://some-url","body")
+    if err != nil {
+       t.Fail()
+    }
   })
+}
+  
 ```
