@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
 )
 
 //ReponseMock is mock configure struct
@@ -29,6 +30,7 @@ var currentContext *MockContext
 
 type MockContext struct {
 	mocks map[string]*ReponseMock
+	test  *testing.T
 }
 
 func (c *MockContext) RegisterMock(mock *ReponseMock) {
@@ -36,8 +38,13 @@ func (c *MockContext) RegisterMock(mock *ReponseMock) {
 	c.mocks[key] = mock
 }
 
-func With(callback func(*MockContext)) {
+func (c *MockContext) Fail() {
+	c.test.Fail()
+}
+
+func With(t *testing.T, callback func(*MockContext)) {
 	ctx := new(MockContext)
+	ctx.test = t
 	ctx.mocks = make(map[string]*ReponseMock)
 	currentContext = ctx
 	callback(ctx)
