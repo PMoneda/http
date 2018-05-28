@@ -30,7 +30,7 @@ body := struct {
   ID string
 }{ID:"my-id"}
 
-http.Post("http://my-awesome-api.com", body, map[string]string{"Content-Type":"application/json});
+http.Post("http://my-awesome-api.com", body, http.Header{Key: "Content-Type", Value: "application/x-www-form-urlencoded"});
 
 ```
 Simple POST
