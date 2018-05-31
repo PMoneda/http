@@ -14,17 +14,17 @@ type Header struct {
 	Value string
 }
 
-//Put make a PUT request
+//Put do a PUT request
 func Put(url string, body interface{}, headers ...Header) (string, error) {
 	return doRequest("PUT", url, body, headers...)
 }
 
-//Post make a POST request
+//Post do a POST request
 func Post(url string, body interface{}, headers ...Header) (string, error) {
 	return doRequest("POST", url, body, headers...)
 }
 
-//Get make a GET request
+//Get do a GET request
 func Get(url string) (string, error) {
 	if currentContext != nil {
 		return doRequestMock("GET", url, nil)
@@ -38,7 +38,7 @@ func Get(url string) (string, error) {
 	}
 }
 
-//GetJSON make a GET request and unmarshal response to JSON
+//GetJSON do a GET request and unmarshal response to JSON
 func GetJSON(url string, obj interface{}) error {
 	response, err := Get(url)
 	if err != nil {
