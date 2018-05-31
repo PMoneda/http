@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aad5169e5db44c6e94410359e20f804e)](https://www.codacy.com/app/PMoneda/http?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PMoneda/http&amp;utm_campaign=Badge_Grade)
 [![GoDoc](https://godoc.org/github.com/PMoneda/http?status.svg)](https://godoc.org/github.com/PMoneda/http)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PMoneda/http)](https://goreportcard.com/report/github.com/PMoneda/http)
 # http
