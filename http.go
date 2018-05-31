@@ -40,11 +40,12 @@ func Get(url string) (string, error) {
 
 //GetJSON make a GET request and unmarshal response to JSON
 func GetJSON(url string, obj interface{}) error {
-	if response, err := Get(url); err != nil {
+	response, err := Get(url)
+	if err != nil {
 		return err
-	} else {
-		return json.Unmarshal([]byte(response), obj)
 	}
+	return json.Unmarshal([]byte(response), obj)
+
 }
 
 func doRequest(method, url string, body interface{}, headers ...Header) (string, error) {
@@ -61,33 +62,32 @@ func httpRequest(method, url string, body interface{}, headers ...Header) (strin
 	case string:
 		reqBody = v
 	default:
-		if j, err := json.Marshal(body); err != nil {
+		j, err := json.Marshal(body)
+		if err != nil {
 			return "", err
-		} else {
-			reqBody = string(j)
+		}
+		reqBody = string(j)
+	}
+	req, err := http.NewRequest(method, url, strings.NewReader(reqBody))
+	if err != nil {
+		return "", err
+	}
+	if headers == nil {
+		req.Header["Content-Type"] = []string{"application/json"}
+	} else {
+		for _, header := range headers {
+			req.Header[header.Key] = []string{header.Value}
 		}
 	}
-	if req, err := http.NewRequest(method, url, strings.NewReader(reqBody)); err != nil {
+	resp, err := client.Do(req)
+	if err != nil {
 		return "", err
+	}
+	if response, err := ioutil.ReadAll(resp.Body); err != nil {
+		return "", err
+	} else if resp.StatusCode >= 300 {
+		return "", fmt.Errorf("Status %s: response: %s", resp.Status, string(response))
 	} else {
-		if headers == nil {
-			req.Header["Content-Type"] = []string{"application/json"}
-		} else {
-			for _, header := range headers {
-				req.Header[header.Key] = []string{header.Value}
-			}
-		}
-
-		if resp, err := client.Do(req); err != nil {
-			return "", err
-		} else {
-			if response, err := ioutil.ReadAll(resp.Body); err != nil {
-				return "", err
-			} else if resp.StatusCode >= 300 {
-				return "", fmt.Errorf("Status %s: response: %s", resp.Status, string(response))
-			} else {
-				return string(response), nil
-			}
-		}
+		return string(response), nil
 	}
 }

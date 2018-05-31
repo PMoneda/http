@@ -28,20 +28,24 @@ func (resp *ReponseMock) RequestBody() string {
 
 var currentContext *MockContext
 
+//MockContext keep current state of mocks
 type MockContext struct {
 	mocks map[string]*ReponseMock
 	test  *testing.T
 }
 
+//RegisterMock register a new mock response to current context
 func (c *MockContext) RegisterMock(mock *ReponseMock) {
 	key := fmt.Sprintf("%s:%s", mock.Method, mock.URL)
 	c.mocks[key] = mock
 }
 
+//Fail fail test
 func (c *MockContext) Fail() {
 	c.test.Fail()
 }
 
+//With creates a new context to register mocks
 func With(t *testing.T, callback func(*MockContext)) {
 	ctx := new(MockContext)
 	ctx.test = t
