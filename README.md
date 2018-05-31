@@ -1,7 +1,7 @@
 [![GoDoc](https://godoc.org/github.com/PMoneda/http?status.svg)](https://godoc.org/github.com/PMoneda/http)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PMoneda/http)](https://goreportcard.com/report/github.com/PMoneda/http)
 # http
-Http Wrapper over default http lib with high level abstraction and mock capabilities
+Http wrapper over default http library with high level abstraction and mock capabilities
 
 
 Install
