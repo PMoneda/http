@@ -1,8 +1,10 @@
+[![GoDoc](https://godoc.org/github.com/PMoneda/http?status.svg)](https://godoc.org/github.com/PMoneda/http)
+[![Go Report Card](https://goreportcard.com/badge/github.com/PMoneda/http)](https://goreportcard.com/report/github.com/PMoneda/http)
 # http
-Http Helper Lib for golang with mock support
+Http Wrapper over default http lib with high level abstraction and mock capabilities
 
 
-Install 
+Install
 1) go get
 ```shell
 $ go get github.com/PMoneda/http
@@ -14,38 +16,69 @@ dep ensure -add github.com/PMoneda/http
 
 Examples
 
-GET
+GET Request
 
 ```golang
+package main
 
-response, err := http.Get("http://my-awesome-api.com");
+import (
+  "github.com/PMoneda/http"
+  "fmt"
+)
+
+func main() {
+  response, _ := http.Get("http://my-awesome-api.com");
+  fmt.Println(response)
+}
+
 
 ```
 
-POST with headers
+POST Request with headers
 
 ```golang
+package main
 
-body := struct {
+import (
+  "github.com/PMoneda/http"
+  "fmt"
+)
+
+func main() {
+  body := struct {
   ID string
-}{ID:"my-id"}
+  }{ID:"my-id"}
 
-http.Post("http://my-awesome-api.com", body, http.Header{Key: "Content-Type", Value: "application/x-www-form-urlencoded"});
+  response, _ := http.Post("http://my-awesome-api.com", body, http.Header{Key: "Content-Type", Value: "application/x-www-form-urlencoded"});
+  fmt.Println(response)
+}
+
 
 ```
-Simple POST
+Simple POST Request
 ```golang
 
-body := struct {
+package main
+
+import (
+  "github.com/PMoneda/http"
+  "fmt"
+)
+
+func main() {
+  body := struct {
   ID string
-}{ID:"my-id"}
+  }{ID:"my-id"}
 
-response, err := http.Post("http://my-awesome-api.com", body);
+  response, _ := http.Post("http://my-awesome-api.com", body);
+  fmt.Println(response)
+}
 
 ```
 
-With Mock
+Testing with http Mock
 ```golang
+
 func TestShouldRequestToAwesomeAPI(t *testing.T) {
   mock := http.ReponseMock{
     Method: "POST",
@@ -58,5 +91,5 @@ func TestShouldRequestToAwesomeAPI(t *testing.T) {
     }
   })
 }
-  
+
 ```

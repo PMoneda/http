@@ -58,7 +58,9 @@ func With(t *testing.T, callback func(*MockContext)) {
 func getMock(method, url string) *ReponseMock {
 	key := fmt.Sprintf("%s:%s", method, url)
 	for k, v := range currentContext.mocks {
-		if v.URL == "*" && v.Method == method {
+		if k == ":" {
+			return v
+		} else if v.URL == "*" && v.Method == method {
 			return v
 		} else if k == key {
 			return v
