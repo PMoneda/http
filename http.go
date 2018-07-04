@@ -85,6 +85,7 @@ func httpRequest(method, url string, body interface{}, headers ...Header) (strin
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
 	if response, err := ioutil.ReadAll(resp.Body); err != nil {
 		return "", err
 	} else if resp.StatusCode >= 300 {
