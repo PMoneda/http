@@ -16,28 +16,39 @@ type Header struct {
 	Value string
 }
 
+type HTTPResponse struct {
+	Status int
+	Body   []byte
+}
+
 //Put do a PUT request
-func Put(url string, body interface{}, headers ...Header) (string, error) {
+func Put(url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
 	return doRequest("PUT", url, body, headers...)
 }
 
 //Post do a POST request
-func Post(url string, body interface{}, headers ...Header) (string, error) {
+func Post(url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
 	return doRequest("POST", url, body, headers...)
 }
 
-//Get do a GET request
-func Get(url string) (string, error) {
+//Get do a GET request and return message status
+func Get(url string) (*HTTPResponse, error) {
 	if currentContext.mocks != nil {
 		return doRequestMock("GET", url, nil)
 	}
-	if resp, err := http.Get(url); err != nil {
-		return "", err
-	} else if response, err := ioutil.ReadAll(resp.Body); err != nil {
-		return "", err
-	} else {
-		return string(response), nil
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
+	defer resp.Body.Close()
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &HTTPResponse{
+		Body:   response,
+		Status: resp.StatusCode,
+	}, nil
 }
 
 //GetJSON do a GET request and unmarshal response to JSON
@@ -46,18 +57,18 @@ func GetJSON(url string, obj interface{}) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal([]byte(response), obj)
+	return json.Unmarshal(response.Body, obj)
 
 }
 
-func doRequest(method, url string, body interface{}, headers ...Header) (string, error) {
+func doRequest(method, url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
 	if currentContext.mocks != nil {
 		return doRequestMock(method, url, body)
 	}
 	return httpRequest(method, url, body, headers...)
 }
 
-func httpRequest(method, url string, body interface{}, headers ...Header) (string, error) {
+func httpRequest(method, url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
 	client := http.DefaultClient
 	reqBody := ""
 	switch v := body.(type) {
@@ -66,13 +77,13 @@ func httpRequest(method, url string, body interface{}, headers ...Header) (strin
 	default:
 		j, err := json.Marshal(body)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		reqBody = string(j)
 	}
 	req, err := http.NewRequest(method, url, strings.NewReader(reqBody))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if headers == nil {
 		req.Header["Content-Type"] = []string{"application/json"}
@@ -83,15 +94,15 @@ func httpRequest(method, url string, body interface{}, headers ...Header) (strin
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if response, err := ioutil.ReadAll(resp.Body); err != nil {
-		return "", err
+		return nil, err
 	} else if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("Status %s: response: %s", resp.Status, string(response))
+		return nil, fmt.Errorf("Status %s: response: %s", resp.Status, string(response))
 	} else {
-		return string(response), nil
+		return &HTTPResponse{Body: response, Status: resp.StatusCode}, nil
 	}
 }
 
@@ -159,13 +170,15 @@ func getMock(method, url string) *ReponseMock {
 	return nil
 }
 
-func doRequestMock(method, url string, body interface{}) (string, error) {
+func doRequestMock(method, url string, body interface{}) (*HTTPResponse, error) {
 	mock := getMock(method, url)
 	if mock == nil {
-		return "", fmt.Errorf("mock for %s %s not defined exception", method, url)
+		return nil, fmt.Errorf("mock for %s %s not defined exception", method, url)
 	}
 	mock.executed++
 	jsonBody, _ := json.Marshal(body)
 	mock.requestBody = string(jsonBody)
-	return mock.ReponseBody, mock.ResponseError
+	return &HTTPResponse{
+		Body: []byte(mock.ReponseBody),
+	}, mock.ResponseError
 }
