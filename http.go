@@ -26,6 +26,16 @@ func Put(url string, body interface{}, headers ...Header) (*HTTPResponse, error)
 	return doRequest("PUT", url, body, headers...)
 }
 
+//Delete do a DELET request
+func Delete(url string, headers ...Header) (*HTTPResponse, error) {
+	return doRequest("DELETE", url, nil, headers...)
+}
+
+//Patch do a PATCH request
+func Patch(url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
+	return doRequest("PATCH", url, body, headers...)
+}
+
 //Post do a POST request
 func Post(url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
 	return doRequest("POST", url, body, headers...)
