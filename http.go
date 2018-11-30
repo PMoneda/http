@@ -83,7 +83,7 @@ func doRequest(method, url string, body interface{}, headers ...Header) (*HTTPRe
 	return httpRequest(method, url, body, headers...)
 }
 
-func FileUpload(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
+func FileUpload(uri string, params map[string]string, paramName, path string) (*HTTPResponse, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,19 @@ func FileUpload(uri string, params map[string]string, paramName, path string) (*
 	}
 	req, err := http.NewRequest("POST", uri, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	return req, err
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if response, err := ioutil.ReadAll(resp.Body); err != nil {
+		return nil, err
+	} else if resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("Status %s: response: %s", resp.Status, string(response))
+	} else {
+		return &HTTPResponse{Body: response, Status: resp.StatusCode}, nil
+	}
 }
 
 func httpRequest(method, url string, body interface{}, headers ...Header) (*HTTPResponse, error) {
